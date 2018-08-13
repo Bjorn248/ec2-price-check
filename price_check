@@ -59,6 +59,11 @@ if [ "$REGION" = "" ]; then
     REGION="us-east-1"
 fi
 
+if ! echo "$region_lookup_map" | grep -q "$REGION"; then
+    echo "Could not find region: $REGION"
+    exit 1
+fi
+
 graphql_region=$(echo "$region_lookup_map" | grep "$REGION" | cut -d',' -f2)
 
 instance_type=$1
