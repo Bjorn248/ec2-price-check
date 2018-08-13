@@ -1,5 +1,73 @@
 #!/bin/bash
 
+# This translates region strings
+# e.g. us-west-2
+# into the regions that the GraphQL API expects
+read -r -d '' region_lookup_map << EOF
+us-gov-west-1,AWS GovCloud (US)
+us-east-1,US East (N. Virginia)
+us-east-2,US East (Ohio)
+us-west-1,US West (N. California)
+us-west-2,US West (Oregon)
+ca-central-1,Canada (Central)
+cn-north-1,China (Beijing)
+cn-north-2,China (Ningxia)
+eu-central-1,EU (Frankfurt)
+eu-west-1,EU (Ireland)
+eu-west-2,EU (London)
+eu-west-3,EU (Paris)
+ap-northeast-1,Asia Pacific (Tokyo)
+ap-northeast-2,Asia Pacific (Seoul)
+ap-northeast-3,Asia Pacific (Osaka-Local)
+ap-southeast-1,Asia Pacific (Singapore)
+ap-southeast-2,Asia Pacific (Sydney)
+ap-south-1,Asia Pacific (Mumbai)
+sa-east-1,South America (Sao Paulo)
+EOF
+
+usage="$(basename "$0") [-h|--help] [-r|--region] <instance_type>
+
+Examples:
+price_check t2.medium
+price_check -r us-west-1 r4.large"
+
+
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+    key="$1"
+
+    case $key in
+        -h|--help)
+        echo "$usage"
+        exit 0
+        ;;
+        -r|--region)
+        REGION="$2"
+        shift # past argument
+        shift # past value
+        ;;
+        *)    # unknown option
+        POSITIONAL+=("$1") # save it in an array for later
+        shift # past argument
+        ;;
+    esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+if [ "$REGION" = "" ]; then
+    REGION="us-east-1"
+fi
+
+graphql_region=$(echo "$region_lookup_map" | grep "$REGION" | cut -d',' -f2)
+
 instance_type=$1
 
-curl -sS -H "Content-Type: application/json" -X POST -d '{"query":"{ AmazonEC2(Location:\"US East (Ohio)\", TermType:\"OnDemand\", InstanceType:\"'"$instance_type"'\", OS:\"Linux\", Tenancy:\"Shared\", PreInstalledSW:\"NA\") {PricePerUnit Unit Currency}}","variables":"","operationName":""}' https://fvaexi95f8.execute-api.us-east-1.amazonaws.com/Dev/graphql/ | cut -d':' -f 4 | cut -d',' -f 1 | cut -d'"' -f2
+price=$(curl -sS -H "Content-Type: application/json" -X POST -d '{"query":"{ AmazonEC2(Location:\"'"$graphql_region"'\", TermType:\"OnDemand\", InstanceType:\"'"$instance_type"'\", OS:\"Linux\", Tenancy:\"Shared\", PreInstalledSW:\"NA\") {PricePerUnit Unit Currency}}","variables":"","operationName":""}' https://fvaexi95f8.execute-api.us-east-1.amazonaws.com/Dev/graphql/ | cut -d':' -f 4 | cut -d',' -f 1 | cut -d'"' -f2)
+
+if [ "$price" = "" ]; then
+    echo "Could not find instance type: $instance_type"
+    exit 1
+fi
+
+echo "$price"
