@@ -1,5 +1,6 @@
 # ec2-price-check
 Gives a quick price check for an instance type
+Provides hourly rate in USD for Linux EC2 instances
 
 ## Dependencies
 * curl
@@ -21,6 +22,7 @@ price_check -r us-west-1 r4.large
 ## Example
 ```
 $ price_check t2.medium
+0.0464
 ```
 
 ## Installation
