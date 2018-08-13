@@ -1,0 +1,5 @@
+#!/bin/bash
+
+instance_type=$1
+
+curl -sS -H "Content-Type: application/json" -X POST -d '{"query":"{ AmazonEC2(Location:\"US East (Ohio)\", TermType:\"OnDemand\", InstanceType:\"'"$instance_type"'\", OS:\"Linux\", Tenancy:\"Shared\", PreInstalledSW:\"NA\") {PricePerUnit Unit Currency}}","variables":"","operationName":""}' https://fvaexi95f8.execute-api.us-east-1.amazonaws.com/Dev/graphql/ | cut -d':' -f 4 | cut -d',' -f 1 | cut -d'"' -f2
