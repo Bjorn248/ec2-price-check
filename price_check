@@ -33,6 +33,13 @@ price_check -r us-west-1 r4.large"
 
 
 POSITIONAL=()
+
+# If no arguments given, print help
+if [ $# -eq 0 ]; then
+    echo "$usage"
+    exit 0
+fi
+
 while [[ $# -gt 0 ]]
 do
     key="$1"
