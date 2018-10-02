@@ -75,7 +75,10 @@ graphql_region=$(echo "$region_lookup_map" | grep "$REGION" | cut -d',' -f2)
 
 instance_type=$1
 
-price=$(curl -sS -H "Content-Type: application/json" -X POST -d '{"query":"{ AmazonEC2(Location:\"'"$graphql_region"'\", TermType:\"OnDemand\", InstanceType:\"'"$instance_type"'\", OS:\"Linux\", Tenancy:\"Shared\", PreInstalledSW:\"NA\") {PricePerUnit Unit Currency}}","variables":"","operationName":""}' https://fvaexi95f8.execute-api.us-east-1.amazonaws.com/Dev/graphql/ | cut -d':' -f 4 | cut -d',' -f 1 | cut -d'"' -f2)
+url=https://fvaexi95f8.execute-api.us-east-1.amazonaws.com/Dev/graphql/
+header="Content-Type: application/json"
+body='{ "query":"{AmazonEC2(Location:\"'"$graphql_region"'\",TermType:\"OnDemand\",InstanceType:\"'"$instance_type"'\",OS:\"Linux\",Tenancy:\"Shared\",PreInstalledSW:\"NA\") {PricePerUnit Unit Currency}}","variables":"","operationName":""}'
+price=$(curl -sS -H "$header" -X POST -d "$body" $url | cut -d':' -f 4 | cut -d',' -f 1 | cut -d'"' -f2)
 
 if [ "$price" = "" ]; then
     echo "Could not find instance type: $instance_type"
