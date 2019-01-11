@@ -87,6 +87,7 @@ read -r -d '' req_body << EOF
         InstanceType:\"${instance_type}\", \
         OS:\"Linux\", \
         Tenancy:\"Shared\", \
+        CapacityStatus:\"Used\", \
         PreInstalledSW:\"NA\") \
     {PricePerUnit Unit Currency}}", \
     "variables":"","operationName":""
