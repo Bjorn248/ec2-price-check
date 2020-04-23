@@ -27,6 +27,7 @@ ap-southeast-2,Asia Pacific (Sydney)
 ap-south-1,Asia Pacific (Mumbai)
 me-south-1,Middle East (Bahrain)
 sa-east-1,South America (Sao Paulo)
+af-south-1,Africa (Cape Town)
 EOF
 
 usage="$(basename "$0") [-h|--help] [-r|--region] <instance_type>
